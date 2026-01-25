@@ -1,5 +1,8 @@
 # MetaCall FaaS
 
+![CI (Linux)](https://github.com/metacall/faas/actions/workflows/ci.yml/badge.svg?branch=master&event=push&job=ci-linux)
+<!-- ![CI (Windows)](https://github.com/metacall/faas/actions/workflows/ci.yml/badge.svg?branch=master&event=push&job=ci-windows) -->
+
 Reimplementation of MetaCall FaaS platform written in TypeScript. This project requires MetaCall installed in order to run it. For more information about installation: https://github.com/metacall/install
 
 ### Development

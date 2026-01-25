@@ -14,11 +14,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ci:
+  ci-linux:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-linux-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-linux-
 
       - name: Setup MetaCall CLI
         run: wget -O - https://raw.githubusercontent.com/metacall/install/master/install.sh | sh
@@ -51,3 +59,48 @@ jobs:
         with:
           access: 'public'
           token: ${{ secrets.NPM_AUTH_TOKEN }}
+
+  ci-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-windows-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-windows-
+
+      - name: Setup MetaCall CLI
+        shell: powershell
+        run: |
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/metacall/install/master/install.ps1 -OutFile install.ps1
+          .\install.ps1
+          echo "$HOME\AppData\Local\MetaCall" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: https://registry.npmjs.org
+
+      - name: Installing Dependencies
+        run: npm i
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Run Unit Tests
+        run: npm run test
+
+      # Integration tests are skipped on Windows due to dependency on Bash and Docker Compose
+      # and the complexity of setting up the environment reliably on Windows runners.
+      # - name: Run Integration Tests
+      #   run: npm run integration
