@@ -91,5 +91,9 @@ export const deployProcess = async (
 		// which is completely out of scope and the promise was fullfilled already
 	});
 
+	proc.on('error', err => {
+		deployReject(err);
+	});
+
 	return promise;
 };

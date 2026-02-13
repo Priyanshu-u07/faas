@@ -59,9 +59,12 @@ export const autoDeployApps = async (appsDir: string): Promise<void> => {
 			succeeded++;
 		} catch (err) {
 			delete Applications[resource.id];
+			// Remove the cached app directory to prevent repeated
+			// failures on every startup (e.g. missing metacall binary)
+			await fs.rm(resource.path, { recursive: true, force: true });
 			// eslint-disable-next-line no-console
 			console.warn(
-				`Failed to load app "${resource.id}":`,
+				`Failed to load app "${resource.id}", removed from cache:`,
 				err instanceof Error ? err.message : String(err)
 			);
 		}
