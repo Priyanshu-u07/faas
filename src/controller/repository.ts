@@ -1,23 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
 import { promises as fs } from 'fs';
 import path, { join } from 'path';
+import {
+	RepositoryBranchListRequest,
+	RepositoryFileListRequest
+} from '@metacall/protocol';
 import { Application, Applications, Resource } from '../app';
 import AppError from '../utils/appError';
 import { appsDirectory } from '../utils/config';
 import { exec } from '../utils/exec';
 import { findRunners } from '../utils/install';
 import { catchAsync } from './catch';
-
-// TODO: Isn't this available inside protocol package? We MUST reuse it
-type FetchFilesFromRepoBody = {
-	branch: string;
-	url: string;
-};
-
-// TODO: Isn't this available inside protocol package? We MUST reuse it
-type FetchBranchListBody = {
-	url: string;
-};
 
 const repositoryName = (url: string): string =>
 	url
@@ -61,7 +54,7 @@ const handleRunners = async (repoPath: string): Promise<string[]> => {
 
 export const repositoryBranchList = catchAsync(
 	async (
-		req: Omit<Request, 'body'> & { body: FetchBranchListBody },
+		req: Omit<Request, 'body'> & { body: RepositoryBranchListRequest },
 		res: Response,
 		next: NextFunction
 	) => {
@@ -88,7 +81,7 @@ export const repositoryBranchList = catchAsync(
 
 export const repositoryFileList = catchAsync(
 	async (
-		req: Omit<Request, 'body'> & { body: FetchFilesFromRepoBody },
+		req: Omit<Request, 'body'> & { body: RepositoryFileListRequest },
 		res: Response,
 		next: NextFunction
 	) => {
@@ -133,7 +126,7 @@ export const repositoryFileList = catchAsync(
 
 export const repositoryClone = catchAsync(
 	async (
-		req: Omit<Request, 'body'> & { body: FetchFilesFromRepoBody },
+		req: Omit<Request, 'body'> & { body: RepositoryFileListRequest },
 		res: Response,
 		next: NextFunction
 	) => {

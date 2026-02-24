@@ -3,20 +3,14 @@ import { NextFunction, Request, Response } from 'express';
 import { rm } from 'fs/promises';
 import { join } from 'path';
 
+import { DeployDeleteRequest } from '@metacall/protocol';
 import { Applications } from '../app';
 import { appsDirectory } from '../utils/config';
 import { catchAsync } from './catch';
 
-// TODO: Isn't this available inside protocol package? We MUST reuse it
-type DeleteBody = {
-	suffix: string; // name of deployment
-	prefix: string;
-	version: string;
-};
-
 export const deployDelete = catchAsync(
 	async (
-		req: Omit<Request, 'body'> & { body: DeleteBody },
+		req: Omit<Request, 'body'> & { body: DeployDeleteRequest },
 		res: Response,
 		_next: NextFunction
 	): Promise<Response> => {
