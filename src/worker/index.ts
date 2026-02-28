@@ -135,16 +135,36 @@ process.on('message', (payload: WorkerMessageUnknown) => {
 					args: string;
 				}>
 			).data;
-			if (process.send) {
-				const result = metacallfms(fn.name, fn.args);
-				process.send({
-					type: WorkerMessageType.InvokeResult,
-					data: {
-						id: fn.id,
-						result
+
+			void (async () => {
+				try {
+					const result = metacallfms(fn.name, fn.args);
+					if (process.send) {
+						process.send({
+							type: WorkerMessageType.InvokeResult,
+							data: {
+								id: fn.id,
+								result
+							}
+						});
 					}
-				});
-			}
+				} catch (err) {
+					// We must inform the master about the error or handle it gracefully.
+					// Since there wasn't an explicit InvokeError type, we'll mimic the old
+					// behavior but at least prevent the worker from crashing silently.
+					console.error(`Error executing function ${fn.name}:`, err);
+					if (process.send) {
+						process.send({
+							type: WorkerMessageType.InvokeResult,
+							data: {
+								id: fn.id,
+								result: { error: String(err) }
+							}
+						});
+					}
+				}
+			})();
+
 			break;
 		}
 
